@@ -1,11 +1,6 @@
-from datetime import datetime, timedelta
-# from turtle import right
-
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-import xlsxwriter
-import datetime
 
 # 设置页面配置
 st.set_page_config(page_title="Financial Dashboard Generator", layout="wide")
@@ -21,19 +16,20 @@ def get_formats(workbook):
     """定义Excel样式格式"""
     return {
         'comp_name_text': workbook.add_format({'size': 12, 'align': 'center','bold': True, 'bg_color': '#002060', 'font_color': '#FFC000', 'border': 1, 'valign': 'vcenter'}),
-        'header': workbook.add_format({'size': 10, 'bold': True, 'bg_color': '#E9EDF4', 'font_color': '#002060', 'align': 'center', 'valign': 'vcenter', 'bottom': 6,'right': 1, 'left': 1}),
+        'header': workbook.add_format({'size': 10, 'bold': True, 'bg_color': '#FFFFFF', 'font_color': '#002060', 'align': 'center', 'valign': 'vcenter', 'bottom': 6,'right': 1, 'left': 1}),
         'year_header': workbook.add_format({'size': 10, 'bold': True, 'bg_color': '#002060', 'font_color': '#FFC000', 'align': 'center', 'valign': 'vcenter', 'border': 1}),
-        'cell_text': workbook.add_format({'size': 10, 'border': 1, 'bg_color': '#E9EDF4', 'align': 'left'}),
-        'cell_num': workbook.add_format({'size': 10, 'num_format': '#,##0', 'border': 1, 'bg_color': '#E9EDF4'}),
-        'cell_num_neg': workbook.add_format({'size': 10, 'num_format': '#,##0;[Red](#,##0)', 'border': 1, 'bg_color': '#E9EDF4'}),
-        'Item': workbook.add_format({'size': 10, 'border': 1, 'bg_color': '#E9EDF4', 'align': 'center'}),
-        'IPO_date': workbook.add_format({'num_format': 'yyyy-mm-dd', 'size': 10, 'border': 1, 'bg_color': '#E9EDF4', 'align': 'center'}),
-        'website': workbook.add_format({'size': 10, 'border': 1, 'bg_color': "#BFC1C5",'font_color': "#FF0000", 'underline': 1})
+        'cell_text': workbook.add_format({'size': 10, 'border': 1, 'bg_color': "#F3F7FF", 'align': 'left'}),
+        'cell_num': workbook.add_format({'size': 10, 'num_format': '#,##0', 'border': 1, 'bg_color': '#F3F7FF'}),
+        'cell_num_neg': workbook.add_format({'size': 10, 'num_format': '#,##0;[Red](#,##0)', 'border': 1, 'bg_color': '#F3F7FF'}),
+        'Item': workbook.add_format({'size': 10, 'border': 1, 'bg_color': '#F3F7FF', 'align': 'center'}),
+        'IPO_date': workbook.add_format({'num_format': 'yyyy-mm-dd', 'size': 10, 'border': 1, 'bg_color': '#F3F7FF', 'align': 'center'}),
+        'website': workbook.add_format({'size': 10, 'border': 1, 'bg_color': "#FFFFFF",'font_color': "#FF0000", 'underline': 1}),
+        'whitespace': workbook.add_format({'border': 1})
     }
 
 if uploaded_file:
     try:
-        # 读取上传的Excel文件
+        # 读取上传的Excel文件,第一列删除，第二列作为索引
         df = pd.read_excel(uploaded_file, sheet_name="Raw Data" or "result")
         
         # 定义财务项目映射
@@ -104,6 +100,8 @@ if uploaded_file:
                     
                     # 添加新的工作表
                     worksheet = workbook.add_worksheet(comp_name)
+
+                    worksheet.write('A:K', "",fmt['whitespace']) # 设置默认背景为纯白色
                     
                     ### Section 1: 表头与框架 ###
                     # 合并单元格写入标题
@@ -137,7 +135,7 @@ if uploaded_file:
                         if pd.isna(val):
                             val = "-"
                         elif isinstance(val, pd.Timestamp):
-                            date_val = val.to_pydatetime()
+                            date_val = val.date()
                             worksheet.write(row_idx + 2, 2, date_val, fmt['IPO_date'])
                         elif isinstance(val, (int, float)): #
                             if type(val) == float:
@@ -150,7 +148,7 @@ if uploaded_file:
                     # 写入网站地址
                     website_address = row.get("Website address", "")
                     if pd.isna(website_address):
-                        website_address = "https://"
+                        website_address = "http://0"
                     worksheet.merge_range('B10:J10', website_address, fmt['website'])
                     
                     worksheet.merge_range('D4:H9',"") # 合并单元格用于业务描述
@@ -242,7 +240,7 @@ if uploaded_file:
                         'fill': {'color': '#002060'},
                         'data_labels': {'value': True, 'num_format': '#,##0', 'font': {'size': 8}} # 显示数值标签，格式为千分位整数
                     })
-                    chart_NS.set_chartarea({'fill': {'color': '#E9EDF4'}})
+                    chart_NS.set_chartarea({'fill': {'color': '#F3F7FF'}})
                     chart_NS.set_plotarea({'fill': {'color': "#FFFFFF"}})
                     chart_NS.set_x_axis({'line': {'color': 'Black'}, 'num_font': {'size': 9, 'color': 'Black'}, 'major_gridlines': {'visible': True}})
                     chart_NS.set_y_axis({'major_gridlines': {'visible': False}, 'label_position': 'none'})
@@ -261,7 +259,7 @@ if uploaded_file:
                         'fill': {'color': '#002060'},
                         'data_labels': {'value': True, 'num_format': '#,##0', 'font': {'size': 8}} # 显示数值标签，格式为千分位整数，标签字体颜色为黑色
                     })
-                    chart_IS.set_chartarea({'fill': {'color': '#E9EDF4'}})
+                    chart_IS.set_chartarea({'fill': {'color': '#F3F7FF'}})
                     chart_IS.set_plotarea({'fill': {'color': "#FFFFFF"}})
                     chart_IS.set_x_axis({'line': {'color': '#000000'}, 'num_font': {'size': 9, 'color': "#000000"}, 'major_gridlines': {'visible': True}})
                     chart_IS.set_y_axis({'major_gridlines': {'visible': False}, 'label_position': 'none'})
@@ -353,7 +351,7 @@ if uploaded_file:
                         else:
                             worksheet.write(idx + 3, 9, val, fmt['cell_text'])
                         if idx == 0 or idx == 1 or idx == 2: # 保留两位小数
-                            worksheet.write(idx + 3, 9, val, workbook.add_format({'num_format': '0.00', 'border': 1, 'bg_color': '#E9EDF4'}))
+                            worksheet.write(idx + 3, 9, val, workbook.add_format({'num_format': '0.00', 'border': 1, 'bg_color': '#F3F7FF'}))
 
                     # 设置行高
                     for row in range(35):
@@ -363,10 +361,11 @@ if uploaded_file:
             st.download_button(
                 label="📥 Download Reports",
                 data=output.getvalue(),
-                file_name="Financial_Reports.xlsx",
+                # 文件重新命名为Company_Report_{year}
+                file_name=f"Financial_Reports_{latest_year}.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            
+
     except Exception as e:
         st.error(f"An error occurred while processing the file: {e}")
         st.write("Please check if the uploaded file has a sheet named 'Raw Data' and the column names match the expected format.")
