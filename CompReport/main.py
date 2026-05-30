@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
-import turtle
 
 # 设置页面配置
 st.set_page_config(page_title="Financial Dashboard Generator", layout="wide")
