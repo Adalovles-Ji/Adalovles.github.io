@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from io import BytesIO
+import turtle
 
 # 设置页面配置
 st.set_page_config(page_title="Financial Dashboard Generator", layout="wide")
@@ -24,7 +25,7 @@ def get_formats(workbook):
         'Item': workbook.add_format({'size': 10, 'border': 1, 'bg_color': '#F3F7FF', 'align': 'center'}),
         'IPO_date': workbook.add_format({'num_format': 'yyyy-mm-dd', 'size': 10, 'border': 1, 'bg_color': '#F3F7FF', 'align': 'center'}),
         'website': workbook.add_format({'size': 10, 'border': 1, 'bg_color': "#FFFFFF",'font_color': "#FF0000", 'underline': 1}),
-        'whitespace': workbook.add_format({'border': 1})
+        'whitespace': workbook.add_format({'border': 1, 'border_color': '#FFFFFF'})
     }
 
 if uploaded_file:
@@ -101,8 +102,11 @@ if uploaded_file:
                     # 添加新的工作表
                     worksheet = workbook.add_worksheet(comp_name)
 
-                    worksheet.write('A:K', "",fmt['whitespace']) # 设置默认背景为纯白色
-                    
+                    # 定义白色填充和无边框样式
+                    for row_num in range(40):
+                        for col in range(12):
+                            worksheet.write(row_num, col, "", fmt['whitespace'])
+
                     ### Section 1: 表头与框架 ###
                     # 合并单元格写入标题
                     worksheet.merge_range('B2:J2', comp_name, fmt['comp_name_text'])
@@ -361,8 +365,8 @@ if uploaded_file:
             st.download_button(
                 label="📥 Download Reports",
                 data=output.getvalue(),
-                # 文件重新命名为Company_Report_{year}
-                file_name=f"Financial_Reports_{latest_year}.xlsx",
+                # 文件重新命名为Company_Report_{year}_{公司数量}.xlsx
+                file_name=f"Company_Report_{latest_year}_{df.shape[0]}_Comps.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
