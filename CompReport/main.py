@@ -365,7 +365,7 @@ if uploaded_file:
                 label="📥 Download Reports",
                 data=output.getvalue(),
                 # 文件重新命名为Company_Report_{year}_{公司数量}.xlsx
-                file_name=f"Company_Report_{latest_year}_{df.shape[0]}_Comps.xlsx",
+                file_name=f"Company_Report_{latest_year}_{df.shape[0]+1}_Comps.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
 
